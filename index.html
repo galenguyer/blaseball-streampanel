@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <h1>Blaseball Stream</h1>
+        <div id='root'>
+            <h2 id='date'></h2>
+        </div>
+        <script>
+            let eventSource = new EventSource("https://cors-proxy.blaseball-reference.com/events/streamData");
+            
+            eventSource.onmessage = function(event) {
+                data = JSON.parse(event.data).value.games;
+                console.log(data);
+
+                if (data.sim != null) {
+                    document.getElementById('date').innerText = 
+                        data.sim.subEraTitle + ': Day ' + data.sim.day;
+                }
+                if (data.schedule != null) {
+                    data.schedule.forEach(game => {
+                        var element = document.getElementById(game.id);
+                        if (element) {
+                            document.getElementById(game.id+'-lastUpdate').innerText = game.lastUpdate;
+                        } else { 
+                            element = document.createElement('div');
+                            element.setAttribute('id', game.id);
+                            var teams = document.createElement('h3');
+                            teams.setAttribute('id', game.id+'-teams');
+                            teams.innerText = game.awayTeamName + ' at ' + game.homeTeamName;
+                            element.appendChild(teams);
+                            
+                            var lastUpdate = document.createElement('p');
+                            lastUpdate.setAttribute('id', game.id+'-lastUpdate');
+                            lastUpdate.innerText = game.lastUpdate;
+                            element.appendChild(lastUpdate);
+                            
+                            document.getElementById('root').appendChild(element);
+                        }
+                    });
+                }
+            };
+        </script>
+    </body>
+</html>
