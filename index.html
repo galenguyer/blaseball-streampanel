@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html>
-    <body>
-        <h1><a href="/">Blaseball Stream Panel</a></h1>
+    <body onhashchange="update(globalGames)">
+        <h1><a href="/#">Blaseball Stream Panel</a></h1>
         <h2 id='date'></h2>
-        <div id='root'>
+        <div id='main'>
+        </div>
+        <div id='game'>
         </div>
         <script>
+            let globalGames = null;
+
             function mainPageUpdateGame(game) {
                 var element = document.getElementById(game.id);
                 if (element) {
@@ -26,17 +30,11 @@
                     lastUpdate.innerText = game.lastUpdate;
                     element.appendChild(lastUpdate);
                     
-                    document.getElementById('root').appendChild(element);
+                    document.getElementById('main').appendChild(element);
                 }
             }
 
-            let eventSource = new EventSource("https://cors-proxy.blaseball-reference.com/events/streamData");
-            
-            eventSource.onmessage = function(event) {
-                let data = JSON.parse(event.data).value;
-                let games = data.games;
-                console.log(games);
-
+            function update(games) {
                 if (games.sim != null) {
                     document.getElementById('date').innerText = 
                         games.sim.subEraTitle + ': Day ' + games.sim.day;
@@ -55,8 +53,22 @@
                     }
                 }
                 else {
-
+                    document.getElementById('main').innerHTML = "";
+                    let gameId = location.hash.slice(1);
+                    var pEvent = document.createElement('p');
+                    pEvent.innerText = games.schedule.filter(game => game.id == gameId)[0].lastUpdate;
+                    document.getElementById('game').prepend(pEvent);
                 }
+            }
+
+            let eventSource = new EventSource("https://cors-proxy.blaseball-reference.com/events/streamData");
+            
+            eventSource.onmessage = function(event) {
+                let data = JSON.parse(event.data).value;
+                let games = data.games;
+                console.log(games);
+                globalGames = games;
+                update(games);
             };
         </script>
     </body>
