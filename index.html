@@ -58,7 +58,10 @@
                     let gameId = location.hash.slice(1);
                     var pEvent = document.createElement('p');
                     pEvent.innerText = games.schedule.filter(game => game.id == gameId)[0].lastUpdate;
-                    document.getElementById('game').prepend(pEvent);
+                    if (document.getElementById('game').childNodes[0] != null 
+                        && document.getElementById('game').childNodes[0].innerText != pEvent.innerText) {
+                        document.getElementById('game').prepend(pEvent);
+                    }
                 }
             }
 
