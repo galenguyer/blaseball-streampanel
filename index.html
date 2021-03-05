@@ -41,6 +41,7 @@
                 }
                 // main page
                 if (location.hash.slice(1) == "") {
+                    document.getElementById('game').innerHTML = "";
                     if (games.schedule != null) {
                         games.schedule.forEach(game => {
                             if (!game.gameComplete)
