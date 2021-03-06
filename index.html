@@ -61,7 +61,7 @@
             function update(games) {
                 if (games != null && games.sim != null) {
                     document.getElementById('date').innerText = 
-                        games.sim.subEraTitle + ': Season ' + games.sim.season + ', Day ' + games.sim.day + 1;
+                        games.sim.subEraTitle + ': Season ' + games.sim.season + ', Day ' + (games.sim.day + 1);
                 }
                 // main page
                 if (location.hash.slice(1) == "") {
