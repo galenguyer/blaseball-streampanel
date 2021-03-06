@@ -83,7 +83,11 @@
                     }
                 }
                 else {  
-                    document.getElementById('main').innerHTML = "";
+                    if (document.getElementById('main').innerHTML != "") {
+                        document.body.scrollTop = 0; // For Safari
+                        document.documentElement.scrollTop = 0;
+                        document.getElementById('main').innerHTML = "";
+                    }
                     let gameId = location.hash.slice(1);
                     if (document.getElementById('game').childNodes[0] == undefined) {
                         history.forEach(h => {
