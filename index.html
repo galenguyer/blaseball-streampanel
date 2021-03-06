@@ -26,7 +26,10 @@
                     teams.appendChild(link);
                     element.appendChild(teams);
                     
-                    var score = document.createElement('p');
+                    if (!game.gameComplete)
+                        var score = document.createElement('p');
+                    else
+                        var score = document.createElement('b');
                     score.setAttribute('id', game.id+'-score');
                     score.innerText = game.awayTeamNickname + ' - ' + game.awayScore + ', ' + game.homeTeamNickname + ' - ' + game.homeScore;
                     element.appendChild(score);
