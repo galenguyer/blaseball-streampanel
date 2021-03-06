@@ -14,7 +14,7 @@
             function mainPageUpdateGame(game) {
                 var element = document.getElementById(game.id);
                 if (element) {
-                    document.getElementById(game.id+'-lastUpdate').innerText = game.lastUpdate;
+                    document.getElementById(game.id+'-lastUpdate').innerText = game.playCount + ': ' + game.lastUpdate;
                 } else { 
                     element = document.createElement('div');
                     element.setAttribute('id', game.id);
@@ -36,7 +36,7 @@
 
                     var lastUpdate = document.createElement('p');
                     lastUpdate.setAttribute('id', game.id+'-lastUpdate');
-                    lastUpdate.innerText = game.lastUpdate;
+                    lastUpdate.innerText = game.playCount + ': ' + game.lastUpdate;
                     element.appendChild(lastUpdate);
                     
                     document.getElementById('main').appendChild(element);
@@ -44,7 +44,7 @@
             }
 
             function update(games) {
-                if (games.sim != null) {
+                if (games != null && games.sim != null) {
                     document.getElementById('date').innerText = 
                         games.sim.subEraTitle + ': Season ' + games.sim.season + ', Day ' + games.sim.day + 1;
                 }
@@ -70,14 +70,12 @@
                 else {  
                     document.getElementById('main').innerHTML = "";
                     let gameId = location.hash.slice(1);
-                    var pEvent = document.createElement('p');
-                    pEvent.innerText = games.schedule.filter(game => game.id == gameId)[0].lastUpdate;
                     if (document.getElementById('game').childNodes[0] == undefined) {
                         history.forEach(h => {
                         h.forEach(hi => {
                                 if (hi.id == window.location.hash.substring(1)) {
                                     var prevEvent = document.createElement('p');
-                                    prevEvent.innerText = hi.lastUpdate;
+                                    prevEvent.innerText = hi.playCount + ': ' + hi.lastUpdate;
                                     if (document.getElementById('game').childNodes[0] == undefined
                                         || document.getElementById('game').childNodes[0].innerText != prevEvent.innerText) {
                                         document.getElementById('game').prepend(prevEvent);
@@ -86,6 +84,10 @@
                             })
                         })
                     }
+
+                    var pEvent = document.createElement('p');
+                    var game = games.schedule.filter(g => g.id == gameId)[0];
+                    pEvent.innerText = game.playCount + ': ' + game.lastUpdate;
                     if (document.getElementById('game').childNodes[0] == undefined
                         || document.getElementById('game').childNodes[0].innerText != pEvent.innerText) {
                         document.getElementById('game').prepend(pEvent);
