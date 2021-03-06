@@ -9,6 +9,7 @@
         </div>
         <script>
             let globalGames = null;
+            let history = [];
 
             function mainPageUpdateGame(game) {
                 var element = document.getElementById(game.id);
@@ -25,6 +26,11 @@
                     teams.appendChild(link);
                     element.appendChild(teams);
                     
+                    var score = document.createElement('p');
+                    score.setAttribute('id', game.id+'-score');
+                    score.innerText = game.awayTeamNickname + ' - ' + game.awayScore + ', ' + game.homeTeamNickname + ' - ' + game.homeScore;
+                    element.appendChild(score);
+
                     var lastUpdate = document.createElement('p');
                     lastUpdate.setAttribute('id', game.id+'-lastUpdate');
                     lastUpdate.innerText = game.lastUpdate;
@@ -37,7 +43,7 @@
             function update(games) {
                 if (games.sim != null) {
                     document.getElementById('date').innerText = 
-                        games.sim.subEraTitle + ': Day ' + games.sim.day;
+                        games.sim.subEraTitle + ': Season ' + games.sim.season + ', Day ' + games.sim.day + 1;
                 }
                 // main page
                 if (location.hash.slice(1) == "") {
@@ -58,11 +64,25 @@
                         });
                     }
                 }
-                else {
+                else {  
                     document.getElementById('main').innerHTML = "";
                     let gameId = location.hash.slice(1);
                     var pEvent = document.createElement('p');
                     pEvent.innerText = games.schedule.filter(game => game.id == gameId)[0].lastUpdate;
+                    if (document.getElementById('game').childNodes[0] == undefined) {
+                        history.forEach(h => {
+                        h.forEach(hi => {
+                                if (hi.id == window.location.hash.substring(1)) {
+                                    var prevEvent = document.createElement('p');
+                                    prevEvent.innerText = hi.lastUpdate;
+                                    if (document.getElementById('game').childNodes[0] == undefined
+                                        || document.getElementById('game').childNodes[0].innerText != prevEvent.innerText) {
+                                        document.getElementById('game').prepend(prevEvent);
+                                    }
+                                }
+                            })
+                        })
+                    }
                     if (document.getElementById('game').childNodes[0] == undefined
                         || document.getElementById('game').childNodes[0].innerText != pEvent.innerText) {
                         document.getElementById('game').prepend(pEvent);
@@ -75,8 +95,9 @@
             eventSource.onmessage = function(event) {
                 let data = JSON.parse(event.data).value;
                 let games = data.games;
-                console.log(games);
+                //console.log(games);
                 globalGames = games;
+                history.push(games.schedule);
                 update(games);
             };
         </script>
