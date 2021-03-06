@@ -15,7 +15,7 @@
             }
         </style>
     </head>
-    <body onhashchange="update(globalGames)">
+    <body onhashchange="render()">
         <h1><a href="#">Blaseball Stream Panel</a></h1>
         <h2 id='date'></h2>
         <div id='main'>
@@ -23,42 +23,59 @@
         <div id='game'>
         </div>
         <script>
-            let globalGames = null;
+            let games = null;
             let history = [];
 
-            function mainPageUpdateGame(game) {
+            function createElement(type, content) {
+                var element = document.createElement(type);
+                element.innerText = content;
+                return element;
+            }
+
+            function createOrUpdateGame(game) {
                 var element = document.getElementById(game.id);
                 if (element) {
-                    document.getElementById(game.id+'-lastUpdate').innerText = game.playCount + ': ' + game.lastUpdate;
+                    var score = document.getElementById(`${game.id}-score`);
+                    if (game.gameComplete) {
+                        if (score.nodeName.toLowerCase() === "p") {
+                            score.remove();
+                            score = createElement(game.gameComplete ? 'b' : 'p',
+                                `${game.awayTeamNickname} - ${game.awayScore}, ${game.homeTeamNickname} - ${game.homeScore}`);
+                            score.setAttribute('id', game.id+'-score');
+                            element.appendChild(score);
+                        }
+                    }
+                    else {
+                        score.innerText = `${game.awayTeamNickname} - ${game.awayScore}, ${game.homeTeamNickname} - ${game.homeScore}`
+                    }
+                    document.getElementById(`${game.id}-lastUpdate`).innerText = `${game.playCount}: ${game.lastUpdate}`;
                 } else { 
                     element = document.createElement('div');
                     element.setAttribute('id', game.id);
-                    var teams = document.createElement('h3');
-                    var link = document.createElement('a');
-                    link.setAttribute('href', '#'+game.id);
-                    link.innerText = game.awayTeamName + ' at ' + game.homeTeamName;
-                    teams.setAttribute('id', game.id+'-teams');
+
+                    var link = createElement('a', `${game.awayTeamName} at ${game.homeTeamName}`);
+                    link.setAttribute('href', `#${game.id}`);
+
+                    var teams = createElement('h3', '');
+                    teams.setAttribute('id', `${game.id}-teams`);
                     teams.appendChild(link);
                     element.appendChild(teams);
                     
-                    if (!game.gameComplete)
-                        var score = document.createElement('p');
-                    else
-                        var score = document.createElement('b');
+                    var score = createElement(game.gameComplete ? 'b' : 'p',
+                        `${game.awayTeamNickname} - ${game.awayScore}, ${game.homeTeamNickname} - ${game.homeScore}`);
                     score.setAttribute('id', game.id+'-score');
-                    score.innerText = game.awayTeamNickname + ' - ' + game.awayScore + ', ' + game.homeTeamNickname + ' - ' + game.homeScore;
                     element.appendChild(score);
 
-                    var lastUpdate = document.createElement('p');
-                    lastUpdate.setAttribute('id', game.id+'-lastUpdate');
-                    lastUpdate.innerText = game.playCount + ': ' + game.lastUpdate;
+                    var lastUpdate = createElement('p', 
+                        `${game.playCount}: ${game.lastUpdate}`);
+                    lastUpdate.setAttribute('id', `${game.id}-lastUpdate`);
                     element.appendChild(lastUpdate);
                     
                     document.getElementById('main').appendChild(element);
                 }
             }
 
-            function update(games) {
+            function render() {
                 if (games != null && games.sim != null) {
                     document.getElementById('date').innerText = 
                         games.sim.subEraTitle + ': Season ' + games.sim.season + ', Day ' + (games.sim.day + 1);
@@ -69,11 +86,11 @@
                     if (games.schedule != null) {
                         games.schedule.forEach(game => {
                             if (!game.gameComplete)
-                                mainPageUpdateGame(game);
+                                createOrUpdateGame(game);
                         });
                         games.schedule.forEach(game => {
                             if (game.gameComplete)
-                                mainPageUpdateGame(game);
+                                createOrUpdateGame(game);
                         });
                         document.getElementById('main').childNodes.forEach(node => {
                             if (games.schedule.filter(game => game.id == node.id).length == 0) {
@@ -118,11 +135,9 @@
             
             eventSource.onmessage = function(event) {
                 let data = JSON.parse(event.data).value;
-                let games = data.games;
-                //console.log(games);
-                globalGames = games;
+                games = data.games;
                 history.push(games.schedule);
-                update(games);
+                render();
             };
         </script>
     </body>
